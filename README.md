@@ -4,6 +4,6 @@ Statistical code for the Routine Immunization Strengthening Program (RISP) Learn
 DRC, NIGER, SOMALIA, PAKISTAN
 
 * Datasets analysed include:
-*   Surveys (DHS, MICS, Vaccine Coverage Surveys)
-*   Administrative data (DHIS2)
-*   Programmatic data
+  Surveys (DHS, MICS, Vaccine Coverage Surveys)
+  Administrative data (DHIS2)
+  Programmatic data
