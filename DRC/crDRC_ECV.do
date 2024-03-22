@@ -1,6 +1,6 @@
 	
-	global user "/Users/catherine.arsenault/Dropbox/9 PAPERS & PROJECTS/BMGF RISP Project/Quant analysis/RAW DATA/DRC"
-	cd "/Users/catherine.arsenault/Dropbox/9 PAPERS & PROJECTS/BMGF RISP Project/Quant analysis/"
+	global user "/Users/catherine.arsenault/Dropbox/BMGF RISP Project/Quant analysis/RAW DATA/DRC"
+	*cd "/Users/catherine.arsenault/Dropbox/9 PAPERS & PROJECTS/BMGF RISP Project/Quant analysis/"
 *-------------------------------------------------------------------------------
 * ECV 2021
 
