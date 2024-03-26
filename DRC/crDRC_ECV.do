@@ -79,10 +79,6 @@ u "$user/ECV/Base ECV 2020 Finale.dta", clear
 	* Vaccination coverage (12-23 months)
 	tabstat $vaccines [aw=weight] if agecat==2 , by(province) stat (mean) 
 	tabstat $vaccines [aw=weight] if agecat==2 & orig6nokin==1 , stat (mean) col(stat)
-	tabstat $vaccines [aw=weight] if agecat==2 & orig6nokin==1 , stat (mean) col(stat)
-
-	
-
 	
 
 /* INEQUALITIES BY EDUCATION
