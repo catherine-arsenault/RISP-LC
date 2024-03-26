@@ -10,6 +10,9 @@
 	lab val educ2 educ2 
 	g province=HH7
 	lab val province labels431
+	recode province (4 9 10 14 18 26 =1) (1/3 5/8 11/13 15/17 19/25=0), g(orig6nokin)
+			// Mongala, Tshuapa, Haut Katanga, Ituri, Kwilu, Kasaï
+
 *-------------------------------------------------------------------------------	
 * Penta3
 	* By card
@@ -100,6 +103,8 @@
 	
 	* Vaccination coverage (12-23 months)
 	tabstat $vaccines [aw=weight] if UB2==1 , by(province) stat (mean) 
+	tabstat $vaccines [aw=weight] if UB2==1 & orig6nokin==1 , stat (mean) col(stat)
+
 
 /* INEQUALITIES BY WEALTH 
 	cd "/Users/catherine.arsenault/Dropbox/9 PAPERS & PROJECTS/BMGF RISP Project/Quant analysis/Archive"
