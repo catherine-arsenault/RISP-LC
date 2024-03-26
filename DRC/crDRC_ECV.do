@@ -9,7 +9,10 @@ u "$user/ECV/ECV_2021_Datasets/ECV_2021_Enfants.dta", clear
 	g weight= ponderation
 	drop province
 	encode q101, g(province)
-	
+	recode province (3 6 10 11 13 17 26 =1) (1/2 4/5 7/9 12 14/16 18/25=0), g(orig7)
+		// Mongala, Tshuapa, Haut Katanga, Ituri, Kinsha, Kwilu, Kasaï
+	recode province (3 6 10 13 17 26 =1) (1/2 4/5 7/9 11 12 14/16 18/25=0), g(orig6nokin)
+
 	recode qa104 (8/9=.), g(educ)
 	lab val educ qa104
 	recode educ 0/1=0 2/3=1, g(educ2)
@@ -29,16 +32,22 @@ u "$user/ECV/ECV_2021_Datasets/ECV_2021_Enfants.dta", clear
 	
 	* Vaccination coverage (12-23 months)
 	tabstat $vaccines [aw=weight] if agecat==2 , by(province) stat (mean) 
+	tabstat $vaccines [aw=weight] if agecat==2 & orig6nokin==1 , stat (mean) col(stat)
 	tabstat $vaccines [aw=weight] if agecat==2 , by(province) stat(count) 
+	
 	
 *-------------------------------------------------------------------------------
 * ECV 2022		
-
 u "$user/ECV/ECV_2022_VAC_Ménages_Mere_Enfants_VT_28052023", clear	
 
 	g weight= ponderation
 	drop province
 	encode q101, g(province)
+	
+	recode province (3 6 10 11 13 17 26 =1) (1/2 4/5 7/9 12 14/16 18/25=0), g(orig7)
+		// Mongala, Tshuapa, Haut Katanga, Ituri, Kinsha, Kwilu, Kasaï
+	recode province (3 6 10 13 17 26 =1) (1/2 4/5 7/9 11 12 14/16 18/25=0), g(orig6nokin)
+
 	
 	recode qa104 (8/9=.), g(educ)
 	lab val educ qa104
@@ -52,14 +61,15 @@ u "$user/ECV/ECV_2022_VAC_Ménages_Mere_Enfants_VT_28052023", clear
 	
 	* Vaccination coverage (12-23 months)
 	tabstat $vaccines [aw=weight] if agecat==2 , by(province) stat (mean) 
+	tabstat $vaccines [aw=weight] if agecat==2 & orig6nokin==1 , stat (mean) col(stat)
 	tabstat $vaccines [aw=weight] if agecat==2 , by(province) stat(count) 
 *-------------------------------------------------------------------------------
 * ECV 2020	
-
 u "$user/ECV/Base ECV 2020 Finale.dta", clear
 	
 	g dose0penta= penta1combinew==0
 	g dose0= aucun8 ==0
+	recode prov (1 3 4 10 13 18 =1) (2 5/9 11 12 14/17 =0), g(orig6nokin)
 	
 	global vaccines bcgcombinew polyo0combinew polyo1combinew polyo3combinew ///
 			penta1combinew penta3combinew pneumo1combinew pneumo3combinew ///
@@ -68,6 +78,9 @@ u "$user/ECV/Base ECV 2020 Finale.dta", clear
 			
 	* Vaccination coverage (12-23 months)
 	tabstat $vaccines [aw=weight] if agecat==2 , by(province) stat (mean) 
+	tabstat $vaccines [aw=weight] if agecat==2 & orig6nokin==1 , stat (mean) col(stat)
+	tabstat $vaccines [aw=weight] if agecat==2 & orig6nokin==1 , stat (mean) col(stat)
+
 	
 
 	
