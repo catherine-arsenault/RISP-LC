@@ -5,13 +5,14 @@
  import spss using "$user/MICS 2017-18/DRCongo MICS6 SPSS Datafiles/ch.sav", clear
  
 	gen weight=chweight/1000000
-	recode  melevel 0/1=0 2/4=1 9=., g(educ2)
-	lab def educ2 0"No educ or primary only" 1"Secondary or higher"
-	lab val educ2 educ2 
 	g province=HH7
 	lab val province labels431
 	recode province (4 9 10 14 18 26 =1) (1/3 5/8 11/13 15/17 19/25=0), g(orig6nokin)
-			// Mongala, Tshuapa, Haut Katanga, Ituri, Kwilu, Kasaï
+			// Kwilu, Mongala, Tshuapa, Haut Katanga, Ituri, Kasaï
+	recode province (1=1) (20=2) (21=3) (19=4) (4 9 10 14 18 26 =5) (2/3 5/8 11/13 15/17 22/25=.), g(provcat)
+	lab def provcat 1"Kinshasa" 2"Haut Lomami" 3"Tanganyika" 4 "Lualaba" 5"Other 6 initial Mashako plan provinces"
+	lab val provcat provcat 
+	decode provcat, g(provs)
 
 *-------------------------------------------------------------------------------	
 * Penta3
@@ -105,85 +106,91 @@
 	tabstat $vaccines [aw=weight] if UB2==1 , by(province) stat (mean) 
 	tabstat $vaccines [aw=weight] if UB2==1 & orig6nokin==1 , stat (mean) col(stat)
 
+*-------------------------------------------------------------------------------				
+* ZDC (no penta1)
 
-/* INEQUALITIES BY WEALTH 
-	cd "/Users/catherine.arsenault/Dropbox/9 PAPERS & PROJECTS/BMGF RISP Project/Quant analysis/Archive"
+* By card
+		recode IM6PENTA1D 1/66=1 99=0, gen(penta1day)
+		recode IM6PENTA1M 1/66=1 99=0, gen(penta1month)
+		recode IM6PENTA1Y 2015/6666=1 9999=0, g(penta1yr)
+		
+		egen penta1_card = rowmax(penta1day penta1month penta1yr) // 1 if there's a date 
+			
+		replace penta1_card =0 if card==0 // kids with no card
 	
-	putexcel set "DRC inequalities MICS2018.xlsx", sheet("Penta3") modify
+	* By recall	
+		recode IM21 1/7=1  8/9=0, g(penta1_recall) // number of penta doses
+			
+			replace penta1_recall= 0 if recall==0 // no vaccines 
+		
+	* Combining card and recall
+		egen penta1 =rowmax(penta1_card penta1_recall) // if either one is true 
+		
+		ta penta1 if UB2==1 [aw=weight] 
+		recode penta1 1=0 0=1, g(zdc)
+		ta zdc if UB2==1 [aw=weight] 
+		
+*-------------------------------------------------------------------------------		
+* INEQUALITIES BY WEALTH 
+	cd "/Users/catherine.arsenault/Dropbox/BMGF RISP Project/Quant analysis/Equity"
 	
-	* By wealth 
+	* BY WEALTH
+	putexcel set "DRC_MICS_2017_18.xlsx", sheet("wealth") modify
+	putexcel B1="N" C1="RII" D1="LCL" E1="UCL"
+	
 		recode windex10 0=.
-		replace windex10 = windex10u if HH7==1 // urban wealth quintiles in Kinshasa
+		replace windex10= windex10u if province==1
 		wridit windex10 [aw=weight] , gen(wealth_rank)
 		
-		levelsof HH7, local(province)
+		levelsof provs, local(prov)
 		
 		local row = 2
 		
-		foreach p of local province {
+		foreach vax in penta3 mcv covbase_comb zdc {
+			putexcel A`row'="`vax'"
+			local row = `row'+1
+				foreach p of local prov {			
+						logit `vax' wealth_rank [pw=weight]  if UB2==1 & provs=="`p'", nolog
+						
+						margins, at(wealth_rank=(0 1)) post
+						nlcom (RII: (_b[2._at] / _b[1._at])), post
+				
+						putexcel A`row'= ("`p'")
+						putexcel B`row'=(r(N))
+						
+						putexcel C`row'=(_b[RII])
+						putexcel D`row'= (_b[RII]-invnormal(1-.05/2)*_se[RII])
+						putexcel E`row'= (_b[RII]+invnormal(1-.05/2)*_se[RII])
+						local row = `row' + 1
+				}
+		}
 			
-				logit penta3 wealth_rank [pw=weight]  if UB2==1 & HH7==`p', nolog
-				margins, at(wealth_rank=(0 1)) post
-				
-				nlcom (RII: (_b[2._at] / _b[1._at])), post
+	* BY EDUC
+		putexcel set "DRC_MICS_2017_18.xlsx", sheet("educ") modify
+		putexcel B1="N" C1="RII" D1="LCL" E1="UCL"
 		
-				putexcel A`row'= ("`p'")
-				putexcel B`row'=(r(N))
-				
-				putexcel C`row'=(_b[RII])
-				putexcel D`row'= (_b[RII]-invnormal(1-.05/2)*_se[RII])
-				putexcel E`row'= (_b[RII]+invnormal(1-.05/2)*_se[RII])
-				local row = `row' + 1
+			recode melevel 9=.
+			wridit melevel [aw=weight] , gen(educ_rank)
+			
+			levelsof provs, local(prov)
+			
+			local row = 2
+			
+			foreach vax in penta3 mcv covbase_comb zdc {
+				putexcel A`row'="`vax'"
+				local row = `row'+1
+					foreach p of local prov {			
+							logit `vax' educ_rank [pw=weight]  if UB2==1 & provs=="`p'", nolog
+							
+							margins, at(educ_rank=(0 1)) post
+							nlcom (RII: (_b[2._at] / _b[1._at])), post
+					
+							putexcel A`row'= ("`p'")
+							putexcel B`row'=(r(N))
+							
+							putexcel C`row'=(_b[RII])
+							putexcel D`row'= (_b[RII]-invnormal(1-.05/2)*_se[RII])
+							putexcel E`row'= (_b[RII]+invnormal(1-.05/2)*_se[RII])
+							local row = `row' + 1
+					}
 			}
-			
-* INEQUALITIES BY EDUCATION
-		recode melevel 9=. 4=3, g(educ4)
-		wridit educ4 [aw=weight] , gen(educ_rank)
-		
-		levelsof HH7, local(province)
-		
-		local row = 40
-		
-		foreach p of local province {
-			
-				logit penta3 educ_rank [pw=weight]  if UB2==1 & HH7==`p', nolog
-				margins, at(educ_rank=(0 1)) post
-				
-				nlcom (RII: (_b[2._at] / _b[1._at])), post
-		
-				putexcel A`row'= ("`p'")
-				putexcel B`row'=(r(N))
-				
-				putexcel C`row'=(_b[RII])
-				putexcel D`row'= (_b[RII]-invnormal(1-.05/2)*_se[RII])
-				putexcel E`row'= (_b[RII]+invnormal(1-.05/2)*_se[RII])
-				local row = `row' + 1
-			}
-
-* EDUC ANALYSES
-	tabstat penta3 [aw=weight] if UB2==1, by(educ2)
-	tabstat penta3 [aw=weight] if UB2==1 & HH7==20, by(educ2)		
-	tabstat penta3 [aw=weight] if UB2==1 & HH7==21, by(educ2)	
-	
-	
-* Pakistan DHS 2017-18
-import spss using "/Users/catherine.arsenault/Dropbox/9 PAPERS & PROJECTS/BMGF RISP Project/Quant analysis/RAW DATA/Pakistan/DHS Pakistan 2017-18 All Datasets/PKKR71SV/PKKR71FL.SAV", clear
-
-	g weight = V005/1000000
-	
-	recode H2 1/3=1 8=., gen(bcg) 
-	
-	tab bcg [aw=weight] if B19>=12 & B19<=23
-
-	
-* Niger DHS 2012
-
-	g weight = v005/1000000
-	
-	recode h2 
-	recode h8 1/3=1 8/9=., g(polio3) 
-	recode h4 1/3=1 8/9=., g(polio1) 
-	
-	ta polio3 [aw=weight] if hw1>=12 & hw1<=23
-	ta polio1 [aw=weight] if hw1>=12 & hw1<=23
-	

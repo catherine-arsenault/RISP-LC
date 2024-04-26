@@ -32,7 +32,7 @@ import spss using "$user/Pakistan/Pakistan (Balochistan) 2019-20 MICS6 Datasets/
 		
 		ta penta3 if UB2==1 [aw=weight] // 34.4% among kids aged 1 yrs old, UB2 is in years (12-23 months)
 
-/*-------------------------------------------------------------------------------		
+*-------------------------------------------------------------------------------		
 * MCV
 		* By card
 		recode IM6MD 1/66=1 99=0, g(mcvday)
