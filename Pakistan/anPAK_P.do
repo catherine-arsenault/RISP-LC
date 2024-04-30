@@ -1,46 +1,45 @@
 * RISP LC, Created by C. Arsenault
 * PAKISTAN 
-* Balochistan MICS 2019
+* Punjab MICS 2018
 
 
 global user "/Users/catherine.arsenault/Dropbox/BMGF RISP Project/Quant analysis"
 	
-	import spss using "$user/Data for analysis/PK_B_2019-20_MICS.sav", clear
+	import spss using "$user/Data for analysis/PK_P_2017-18_MICS.sav", clear
 		egen uniqueid=concat(UF1 UF2 UF3 UF4 UF5 UF7D UF7M UF8H UF8M)
 		keep uniqueid card-mcv2_sampled
-		save "$user/Data for analysis/PK_B_2019_MICS.dta", replace
+		save "$user/Data for analysis/PK_P_2018_MICS.dta", replace
 	
-import spss using "$user/RAW DATA/Pakistan/Pakistan (Balochistan) 2019-20 MICS6 Datasets/Pakistan (Baluchistan) SPSS Datasets/ch.sav", clear
+import spss using "$user/RAW DATA/Pakistan/Pakistan Punjab MICS6 Datasets/ch.sav", clear
 		egen uniqueid=concat(UF1 UF2 UF3 UF4 UF5 UF7D UF7M UF8H UF8M)
-		merge 1:1 uniqueid using "$user/Data for analysis/PK_B_2019_MICS.dta"
+		merge 1:1 uniqueid using "$user/Data for analysis/PK_P_2018_MICS.dta"
 		drop _merge
 
 *-------------------------------------------------------------------------------
 * Adding missing variables
+drop ipv*
+		recode IM6ID 1/66=1 98/99=0, g(ipvday)
+		recode IM6IM 1/66=1 98/99=0, g(ipvmonth)
+		recode IM6IY 2015/6666=1 9998/9999=0, g(ipvyr)
+		
+		egen ipv_card = rowmax(ipvday ipvmonth ipvyr) 
+		replace ipv_card=0 if card==0
+		* By recall 
+		recode IM19 2=0 8/9=0, g(ipv_recall)
+		replace ipv_recall = 0 if recall==0
+		
+		egen ipv=rowmax(ipv_card ipv_recall) 
 * Divisions
 	decode division, g(divs)
-* Polio3 
-		recode IM6PENTA3D  1/66=1 98/99=0, g(opv3day)
-		recode IM6PENTA3M 1/44=1 99=0, g(opv3month)
-		recode IM6PENTA3Y 2015/4444=1 9999=0, g(opv3yr)
-		egen opv3_card = rowmax(opv3day opv3month opv3yr) 
-		replace opv3_card=0 if card==0
-	
-		
-		recode IM18 1/2=0 3/7=1  8/9=0, g(opv3_recall)
-		replace opv3_recall= 0 if recall==0 // no vaccines recalled by mother
-		egen polio3=rowmax(opv3_card opv3_recall)
-
 * Polio full (IPV + polio3 )
 		egen polio_full=rowtotal(ipv polio3)
-		recode polio_ful 1=0 2=1
-		
+		recode polio_full 1=0 2=1
 *Fully vaccinated (basic)	
 		egen covbase_comb=rowtotal(bcg penta3 polio3 mcv1)
 		recode covbase_comb 0/3=0 4=1
 * ZDC
 		recode penta1 0=1 1=0, g(zdc)
-	
+		
 tabstat bcg polio0 polio1 polio3 penta1 penta3 pcv1 pcv3 ipv polio_full mcv1 ///
 		covbase_comb zdc if UB2==1 [aw=chweigh], stat(mean) col(stat)
 		
@@ -53,16 +52,16 @@ tabstat bcg polio0 polio1 polio3 penta1 penta3 pcv1 pcv3 ipv polio_full mcv1 ///
 tabstat bcg polio0 polio1 polio3 penta1 penta3 pcv1 pcv3 ipv polio_full mcv1 ///
 		covbase_comb zdc if UB2==1 [aw=chweigh], by(HL4) stat(mean) 
 *-------------------------------------------------------------------------------
-* INEQUALITIES AT NATIONAL LEVEL
+* INEQUALITIES AT PROVINCIAL LEVEL
 *-------------------------------------------------------------------------------
 * BY WEALTH
 *-------------------------------------------------------------------------------
 	cd "/Users/catherine.arsenault/Dropbox/BMGF RISP Project/Quant analysis/Equity"
 	
-	putexcel set "PAK_B.xlsx", sheet("2019_wealth") modify
+	putexcel set "PAK_P.xlsx", sheet("2018_wealth") modify
 	
 	* RII
-	putexcel A1="Balochistan" B1="N" C1="RII" D1="LCL" E1="UCL"
+	putexcel A1="Punjab" B1="N" C1="RII" D1="LCL" E1="UCL"
 	
 		recode windex10 0=.
 		wridit windex10 [aw=chweight] , gen(wealth_rank)
@@ -103,15 +102,15 @@ tabstat bcg polio0 polio1 polio3 penta1 penta3 pcv1 pcv3 ipv polio_full mcv1 ///
 						local row = `row' + 1
 		}		
 *-------------------------------------------------------------------------------
-* NATIONAL LEVEL
+* PROVINCIAL LEVEL
 *-------------------------------------------------------------------------------
 * BY EDUCATION
 *-------------------------------------------------------------------------------
 	
-	putexcel set "PAK_B.xlsx", sheet("2019_educ") modify
+	putexcel set "PAK_P.xlsx", sheet("2018_educ") modify
 	
 	* RII
-	putexcel A1="Balochistan" B1="N" C1="RII" D1="LCL" E1="UCL"
+	putexcel A1="Punjab" B1="N" C1="RII" D1="LCL" E1="UCL"
 	
 		recode melevel 9=.
 		wridit melevel [aw=chweight] , gen(educ_rank)
@@ -158,7 +157,7 @@ tabstat bcg polio0 polio1 polio3 penta1 penta3 pcv1 pcv3 ipv polio_full mcv1 ///
 * BY WEALTH
 *-------------------------------------------------------------------------------
 * RII
-	putexcel set "PAK_B.xlsx", sheet("2019_wealth") modify
+	putexcel set "PAK_P.xlsx", sheet("2018_wealth") modify
 
 	putexcel A13="By division" B13="N" C13="RII" D13="LCL" E13="UCL"
 	
@@ -186,7 +185,7 @@ tabstat bcg polio0 polio1 polio3 penta1 penta3 pcv1 pcv3 ipv polio_full mcv1 ///
 		}
 
 * SII
-	putexcel set "PAK_B.xlsx", sheet("2019_wealth") modify
+	putexcel set "PAK_P.xlsx", sheet("2018_wealth") modify
 	
 	putexcel  G13="SII" H13="LCL" I13="UCL"
 	
@@ -217,7 +216,7 @@ tabstat bcg polio0 polio1 polio3 penta1 penta3 pcv1 pcv3 ipv polio_full mcv1 ///
 * BY EDUCATION
 *-------------------------------------------------------------------------------
 * RII
-	putexcel set "PAK_B.xlsx", sheet("2019_educ") modify
+	putexcel set "PAK_P.xlsx", sheet("2018_educ") modify
 
 	putexcel A13="By division" B13="N" C13="RII" D13="LCL" E13="UCL"
 	
@@ -245,7 +244,7 @@ tabstat bcg polio0 polio1 polio3 penta1 penta3 pcv1 pcv3 ipv polio_full mcv1 ///
 		}
 
 * SII
-	putexcel set "PAK_B.xlsx", sheet("2019_educ") modify
+	putexcel set "PAK_P.xlsx", sheet("2018_educ") modify
 
 	putexcel  G13="SII" H13="LCL" I13="UCL"
 	
@@ -270,10 +269,5 @@ tabstat bcg polio0 polio1 polio3 penta1 penta3 pcv1 pcv3 ipv polio_full mcv1 ///
 						local row = `row' + 1
 				}
 		}
-
-
-
-		
-		
 
 
