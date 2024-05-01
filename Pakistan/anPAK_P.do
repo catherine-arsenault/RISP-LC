@@ -17,6 +17,7 @@ import spss using "$user/RAW DATA/Pakistan/Pakistan Punjab MICS6 Datasets/ch.sav
 
 *-------------------------------------------------------------------------------
 * Adding missing variables
+gen province="Punjab 2017-18"
 drop ipv*
 		recode IM6ID 1/66=1 98/99=0, g(ipvday)
 		recode IM6IM 1/66=1 98/99=0, g(ipvmonth)
@@ -51,6 +52,17 @@ tabstat bcg polio0 polio1 polio3 penta1 penta3 pcv1 pcv3 ipv polio_full mcv1 ///
 		
 tabstat bcg polio0 polio1 polio3 penta1 penta3 pcv1 pcv3 ipv polio_full mcv1 ///
 		covbase_comb zdc if UB2==1 [aw=chweigh], by(HL4) stat(mean) 
+		
+preserve 
+	collapse (mean) bcg polio0 polio1 polio3 penta1 penta3 pcv1 pcv3 ipv polio_full ///
+		mcv1 covbase_comb zdc (first) province if UB2==1 [aw=chweigh]
+	export excel using "$user/Results/pakistan", sheet("pak_p_2018_overall", modify) firstrow(var) 
+restore
+preserve 
+	collapse (mean) bcg polio0 polio1 polio3 penta1 penta3 pcv1 pcv3 ipv polio_full ///
+	mcv1 covbase_comb zdc (first) province if UB2==1 [aw=chweigh], by(division)
+	export excel using "$user/Results/pakistan", sheet("pak_p_2018_div", modify) firstrow(var) 
+restore
 *-------------------------------------------------------------------------------
 * INEQUALITIES AT PROVINCIAL LEVEL
 *-------------------------------------------------------------------------------

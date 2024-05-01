@@ -17,6 +17,7 @@ global user "/Users/catherine.arsenault/Dropbox/BMGF RISP Project/Quant analysis
 
 *-------------------------------------------------------------------------------
 * Adding missing variables
+gen province="Sindh 2018-19"
 drop ipv*
 		recode IM6ID 1/66=1 97/99=0, g(ipvday)
 		recode IM6IM 1/66=1 97/99=0, g(ipvmonth)
@@ -51,6 +52,17 @@ tabstat bcg polio0 polio1 polio3 penta1 penta3 pcv1 pcv3 ipv polio_full mcv1 ///
 		
 tabstat bcg polio0 polio1 polio3 penta1 penta3 pcv1 pcv3 ipv polio_full mcv1 ///
 		covbase_comb zdc if CAGE>=12 & CAGE<=23 [aw=chweigh], by(HL4) stat(mean) 
+		
+preserve 
+	collapse (mean) bcg polio0 polio1 polio3 penta1 penta3 pcv1 pcv3 ipv polio_full ///
+		mcv1 covbase_comb zdc (first) province if UB2==1 [aw=chweigh]
+	export excel using "$user/Results/pakistan", sheet("pak_s_2018_overall", modify) firstrow(var) 
+restore
+preserve 
+	collapse (mean) bcg polio0 polio1 polio3 penta1 penta3 pcv1 pcv3 ipv polio_full ///
+	mcv1 covbase_comb zdc (first) province if UB2==1 [aw=chweigh], by(division)
+	export excel using "$user/Results/pakistan", sheet("pak_s_2018_div", modify) firstrow(var) 
+restore
 *-------------------------------------------------------------------------------
 * INEQUALITIES AT PROVINCIAL LEVEL
 *-------------------------------------------------------------------------------

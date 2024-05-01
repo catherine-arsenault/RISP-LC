@@ -17,6 +17,7 @@ import spss using "$user/RAW DATA/Pakistan/Pakistan Khyber Pakhtunkhwa 2019 MICS
 
 *-------------------------------------------------------------------------------
 * Adding missing variables
+gen province="Khyber Pakhtunkhwa 2019"
 * Divisions
 	decode division, g(divs)
 * Polio full (IPV + polio3 )
@@ -39,6 +40,17 @@ tabstat bcg polio0 polio1 polio3 penta1 penta3 pcv1 pcv3 ipv polio_full mcv1 ///
 		
 tabstat bcg polio0 polio1 polio3 penta1 penta3 pcv1 pcv3 ipv polio_full mcv1 ///
 		covbase_comb zdc if UB2==1 [aw=chweigh], by(HL4) stat(mean) 
+		
+preserve 
+	collapse (mean) bcg polio0 polio1 polio3 penta1 penta3 pcv1 pcv3 ipv polio_full ///
+		mcv1 covbase_comb zdc (first) province if UB2==1 [aw=chweigh]
+	export excel using "$user/Results/pakistan", sheet("pak_kp_2019_overall", modify) firstrow(var) 
+restore
+preserve 
+	collapse (mean) bcg polio0 polio1 polio3 penta1 penta3 pcv1 pcv3 ipv polio_full ///
+	mcv1 covbase_comb zdc (first) province if UB2==1 [aw=chweigh], by(division)
+	export excel using "$user/Results/pakistan", sheet("pak_kp_2019_div", modify) firstrow(var) 
+restore
 *-------------------------------------------------------------------------------
 * INEQUALITIES AT NATIONAL LEVEL
 *-------------------------------------------------------------------------------

@@ -1,7 +1,6 @@
 * RISP LC, Created by C. Arsenault
 * PAKISTAN 
-* Balochistan MICS 2019
-
+* Balochistan MICS 2019-20
 
 global user "/Users/catherine.arsenault/Dropbox/BMGF RISP Project/Quant analysis"
 	
@@ -17,6 +16,7 @@ import spss using "$user/RAW DATA/Pakistan/Pakistan (Balochistan) 2019-20 MICS6 
 
 *-------------------------------------------------------------------------------
 * Adding missing variables
+gen province="Balochistan 2019-20"
 * Divisions
 	decode division, g(divs)
 * Polio3 
@@ -52,6 +52,17 @@ tabstat bcg polio0 polio1 polio3 penta1 penta3 pcv1 pcv3 ipv polio_full mcv1 ///
 		
 tabstat bcg polio0 polio1 polio3 penta1 penta3 pcv1 pcv3 ipv polio_full mcv1 ///
 		covbase_comb zdc if UB2==1 [aw=chweigh], by(HL4) stat(mean) 
+
+preserve 
+	collapse (mean) bcg polio0 polio1 polio3 penta1 penta3 pcv1 pcv3 ipv polio_full ///
+		mcv1 covbase_comb zdc (first) province if UB2==1 [aw=chweigh]
+	export excel using "$user/Results/pakistan", sheet("pak_b_2019_overall", modify) firstrow(var) 
+restore
+preserve 
+	collapse (mean) bcg polio0 polio1 polio3 penta1 penta3 pcv1 pcv3 ipv polio_full ///
+	mcv1 covbase_comb zdc (first) province if UB2==1 [aw=chweigh], by(division)
+	export excel using "$user/Results/pakistan", sheet("pak_b_2019_div", modify) firstrow(var) 
+restore
 *-------------------------------------------------------------------------------
 * INEQUALITIES AT NATIONAL LEVEL
 *-------------------------------------------------------------------------------
