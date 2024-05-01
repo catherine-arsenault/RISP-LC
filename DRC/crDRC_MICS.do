@@ -9,8 +9,11 @@
 	lab val province labels431
 	recode province (4 9 10 14 18 26 =1) (1/3 5/8 11/13 15/17 19/25=0), g(orig6nokin)
 			// Kwilu, Mongala, Tshuapa, Haut Katanga, Ituri, Kasaï
+			
 	recode province (1=1) (20=2) (21=3) (19=4) (4 9 10 14 18 26 =5) (2/3 5/8 11/13 15/17 22/25=.), g(provcat)
+	
 	lab def provcat 1"Kinshasa" 2"Haut Lomami" 3"Tanganyika" 4 "Lualaba" 5"Other 6 initial Mashako plan provinces"
+	
 	lab val provcat provcat 
 	decode provcat, g(provs)
 
@@ -69,6 +72,24 @@
 		egen bcg=rowmax(bcg_card bcg_recall)
 		
 		ta bcg if UB2==1 [aw=weight] 
+ *-------------------------------------------------------------------------------				
+* OPV1   
+		* By card
+		recode IM6P1D 1/66=1 97/99=0, g(opv1day)
+		recode IM6P1M 1/66=1 97/99=0, g(opv1month)
+		recode IM6P1Y 2015/6666=1 9997/9999=0, g(opv1yr)
+		
+		egen opv1_card = rowmax(opv1day opv1month opv1yr) 
+		replace opv1_card=0 if card==0
+		
+		
+		recode IM18 1/7=1  8/9=0, g(opv1_recall)
+		
+		replace opv1_recall= 0 if recall==0 // no vaccines recalled by mother
+		
+		egen opv1=rowmax(opv1_card opv1_recall)
+
+		ta opv1 if UB2==1 [aw=weight]
 *-------------------------------------------------------------------------------				
 * OPV3   
 		* By card
@@ -96,16 +117,17 @@
 
 *-------------------------------------------------------------------------------				
 * Fully vaccinated
-
 	egen covbase_comb = rowtotal(bcg penta3 mcv opv3)
 	recode covbase_comb 0/3=0 4=1
+	
 
-	global vaccines penta3 mcv bcg opv3 covbase_comb
+	global vaccines bcg opv3 penta3 mcv covbase_comb 
 	
 	* Vaccination coverage (12-23 months)
+	tabstat $vaccines [aw=weight] if UB2==1 , stat (mean) col(stat)
 	tabstat $vaccines [aw=weight] if UB2==1 , by(province) stat (mean) 
-	tabstat $vaccines [aw=weight] if UB2==1 & orig6nokin==1 , stat (mean) col(stat)
-
+	tabstat $vaccines [aw=weight] if UB2==1, by(HH6) stat (mean) 
+	tabstat $vaccines [aw=weight] if UB2==1, by(HL4) stat (mean) 
 *-------------------------------------------------------------------------------				
 * ZDC (no penta1)
 
