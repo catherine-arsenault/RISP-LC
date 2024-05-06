@@ -16,6 +16,7 @@
 	
 	lab val provcat provcat 
 	decode provcat, g(provs)
+	replace windex10 = windex10u if provcat==1
 
 *-------------------------------------------------------------------------------	
 * Penta3
