@@ -1,6 +1,5 @@
 	
 	global user "/Users/catherine.arsenault/Dropbox/BMGF RISP Project/Quant analysis/RAW DATA/DRC"
-	*cd "/Users/catherine.arsenault/Dropbox/9 PAPERS & PROJECTS/BMGF RISP Project/Quant analysis/"
 *-------------------------------------------------------------------------------
 * ECV 2021
 
@@ -43,7 +42,7 @@ u "$user/ECV/ECV_2022_VAC_Ménages_Mere_Enfants_VT_28052023", clear
 	g weight= ponderation
 	drop province
 	encode q101, g(province)
-	
+
 	recode province (3 6 10 11 13 17 26 =1) (1/2 4/5 7/9 12 14/16 18/25=0), g(orig7)
 		// Mongala, Tshuapa, Haut Katanga, Ituri, Kinsha, Kwilu, Kasaï
 	recode province (3 6 10 13 17 26 =1) (1/2 4/5 7/9 11 12 14/16 18/25=0), g(orig6nokin)
@@ -59,10 +58,21 @@ u "$user/ECV/ECV_2022_VAC_Ménages_Mere_Enfants_VT_28052023", clear
 		recode `v' 2=0
 	}
 	
+	egen vpo3vpi=rowtotal(vpo3_merg vpi_merg)
+	recode vpo3vpi 1=0 2=1
+	
 	* Vaccination coverage (12-23 months)
 	tabstat $vaccines [aw=weight] if agecat==2 , by(province) stat (mean) 
 	tabstat $vaccines [aw=weight] if agecat==2 & orig6nokin==1 , stat (mean) col(stat)
 	tabstat $vaccines [aw=weight] if agecat==2 , by(province) stat(count) 
+	
+	* Polio vaccination by aire de santé
+preserve 
+	collapse (mean) vpo3_merg vpi_merg vpo3vpi (count) n_vpo3_merg=vpo3_merg n_vpi_merg=vpi_merg ///
+		n_vpo3vpi= vpo3vpi [aw=weight] if  (province==4 | province==14 | province==24) , by(province q103 q105) 
+	order province, before(q103)
+	export excel using "/Users/catherine.arsenault/Dropbox/BMGF RISP Project/Quant analysis/Results/DRC/polio_aire", firstrow(var) replace
+restore
 *-------------------------------------------------------------------------------
 * ECV 2020	
 u "$user/ECV/Base ECV 2020 Finale.dta", clear
@@ -81,32 +91,6 @@ u "$user/ECV/Base ECV 2020 Finale.dta", clear
 	tabstat $vaccines [aw=weight] if agecat==2 & orig6nokin==1 , stat (mean) col(stat)
 	
 
-/* INEQUALITIES BY EDUCATION
-	cd "/Users/catherine.arsenault/Dropbox/9 PAPERS & PROJECTS/BMGF RISP Project/Quant analysis/Archive"
-	
-	putexcel set "DRC inequalities MICS2018.xlsx", sheet("Penta3 RII educ 2021") modify
-	
-		wridit educ [aw=weight] , gen(educ_rank)
-		
-		levelsof province, local(province)
-		
-		local row = 2
-		
-		foreach p of local province {
-			
-				logit penta3_merg educ_rank [pw=weight]  if agecat==2 & province==`p', nolog
-				margins, at(educ_rank=(0 1)) post
-				
-				nlcom (RII: (_b[2._at] / _b[1._at])), post
-		
-				putexcel A`row'= ("`p'")
-				putexcel B`row'=(r(N))
-				
-				putexcel C`row'=(_b[RII])
-				putexcel D`row'= (_b[RII]-invnormal(1-.05/2)*_se[RII])
-				putexcel E`row'= (_b[RII]+invnormal(1-.05/2)*_se[RII])
-				local row = `row' + 1
-			}
-	
+
 	
 
