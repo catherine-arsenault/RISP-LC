@@ -372,7 +372,8 @@ replace rmonth =58 if mo == 10 & year==2023
 replace rmonth =59 if mo == 11 & year==2023
 replace rmonth =60 if mo == 12 & year==2023
 
-
+encode orgunitlevel2, g(province)
+order province, after(orgunitlevel1)
 	save  "$user/RAW DATA/DRC/DHIS2/DHIS2_2019-2023_long.dta", replace
 	
 	
