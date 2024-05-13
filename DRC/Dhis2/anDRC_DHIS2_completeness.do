@@ -14,7 +14,7 @@ foreach x of global vax {
 				replace count`x'=. if count`x'==0 // those never reporting are set to missing
 				}	
 				
-collapse (count) bcg_- rota3_ countbcg_- countrota3_ , by(province year month rmonth)
+collapse (count) bcg_- rota3_ countbcg_- countrota3_ , by(province year mo rmonth)
 sort province rmonth
 
 	
@@ -23,7 +23,7 @@ sort province rmonth
 				egen avg_compl_`x' = mean(complete`x'), by(province year) 
 			}
 			
-keep province month year rmonth penta3_ mmr_ countpenta3_ countmmr_ completepenta3_ avg_compl_penta3_ completemmr_ avg_compl_mmr_
+keep province year mo rmonth penta3_ mmr_ countpenta3_ countmmr_ completepenta3_ avg_compl_penta3_ completemmr_ avg_compl_mmr_
 			 
 	
 /*	collapse (mean) countpenta3  countmmr  avg_compl_penta3 avg_compl_mmr , by(province year)
