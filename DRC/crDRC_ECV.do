@@ -16,7 +16,7 @@ u "$user/ECV/ECV_2021_Datasets/ECV_2021_Enfants.dta", clear
 	replace provcat = 3 if province == 24
 	replace provcat = 4 if province == 14
 	replace provcat = 5 if province == 3 |  province== 6  | province == 10  |  province == 13  |  province == 17  |  province == 26
-	lab def provcat 1"Kinshasa" 2"Haut Lomami" 3"Tanganyika" 4 "Lualaba" 5"Other 6 initial Mashako plan provinces
+	lab def provcat 1"Kinshasa" 2"Haut Lomami" 3"Tanganyika" 4 "Lualaba" 5"Other 6 initial Mashako plan provinces"
 	lab val provcat provcat 
 	
 	
@@ -39,6 +39,15 @@ u "$user/ECV/ECV_2021_Datasets/ECV_2021_Enfants.dta", clear
 	
 	* Vaccination coverage (12-23 months)
 	tabstat $vaccines [aw=weight] if agecat==2 , by(provcat) stat (mean) 
+	
+	keep if agecat==2 
+	keep weight provcat penta3_merg covbase_comb vpo3_merg
+	gen post=1
+	rename penta3_merg penta3 
+	rename covbase_comb fullvax
+	rename vpo3_merg opv3
+
+	save "/Users/catherine.arsenault/Dropbox/BMGF RISP Project/Quant analysis/Data for analysis/DRC4tmp.dta", replace
 
 *-------------------------------------------------------------------------------
 * ECV 2022		
@@ -52,7 +61,7 @@ u "$user/ECV/ECV_2022_VAC_Ménages_Mere_Enfants_VT_28052023", clear
 	replace provcat = 3 if province == 24
 	replace provcat = 4 if province == 14
 	replace provcat = 5 if province == 3 | province == 6  |  province == 10  |  province== 13  |  province == 17  | province == 26
-	lab def provcat 1"Kinshasa" 2"Haut Lomami" 3"Tanganyika" 4 "Lualaba" 5"Other 6 initial Mashako plan provinces
+	lab def provcat 1"Kinshasa" 2"Haut Lomami" 3"Tanganyika" 4 "Lualaba" 5"Other 6 initial Mashako plan provinces"
 	lab val provcat provcat 
 	
 	recode qa104 (8/9=.), g(educ)
@@ -71,13 +80,21 @@ u "$user/ECV/ECV_2022_VAC_Ménages_Mere_Enfants_VT_28052023", clear
 	* Vaccination coverage (12-23 months)
 	tabstat $vaccines [aw=weight] if agecat==2 , by(provcat) stat (mean) 
 	
-	* Polio vaccination by aire de santé
+	keep if agecat==2 
+	keep weight provcat penta3_merg covbase_comb vpo3_merg
+	gen post=1
+	rename penta3_merg penta3 
+	rename covbase_comb fullvax
+	rename vpo3_merg opv3
+	save "/Users/catherine.arsenault/Dropbox/BMGF RISP Project/Quant analysis/Data for analysis/DRC5tmp.dta", replace
+
+	/* Polio vaccination by aire de santé
 preserve 
 	collapse (mean) vpo3_merg vpi_merg vpo3vpi (count) n_vpo3_merg=vpo3_merg n_vpi_merg=vpi_merg ///
 		n_vpo3vpi= vpo3vpi [aw=weight] if  (province==4 | province==14 | province==24) , by(province q103 q105) 
 	order province, before(q103)
 	export excel using "/Users/catherine.arsenault/Dropbox/BMGF RISP Project/Quant analysis/Results/DRC/polio_aire", firstrow(var) replace
-restore
+restore */
 *-------------------------------------------------------------------------------
 * ECV 2020	
 u "$user/ECV/Base ECV 2020 Finale.dta", clear
@@ -89,7 +106,7 @@ u "$user/ECV/Base ECV 2020 Finale.dta", clear
 	replace provcat = 3 if prov == 16
 	replace provcat = 5 if prov ==13  |  prov == 18  |  prov==1   |  prov==3  |  prov== 10  |  prov ==4
 	// Mongala, Tshuapa, Haut Katanga, Ituri, Kinsha, Kwilu, Kasaï
-	lab def provcat 1"Kinshasa" 2"Haut Lomami" 3"Tanganyika" 4 "Lualaba" 5"Other 6 initial Mashako plan provinces
+	lab def provcat 1"Kinshasa" 2"Haut Lomami" 3"Tanganyika" 4 "Lualaba" 5"Other 6 initial Mashako plan provinces"
 	lab val provcat provcat 	
 	global vaccines bcgcombinew polyo0combinew polyo1combinew polyo3combinew ///
 			penta1combinew penta3combinew pneumo1combinew pneumo3combinew ///
@@ -98,8 +115,16 @@ u "$user/ECV/Base ECV 2020 Finale.dta", clear
 			
 	* Vaccination coverage (12-23 months)
 	tabstat $vaccines [aw=weight] if agecat==2 , by(provcat) stat (mean) 
-
 	
+	keep if agecat==2 
+	keep weight provcat penta3combinew couvebasecomb  polyo3combinew 
+	gen post=1
+	rename penta3combine penta3
+	rename couvebasecomb fullvax
+	rename polyo3combinew opv3
+
+save "/Users/catherine.arsenault/Dropbox/BMGF RISP Project/Quant analysis/Data for analysis/DRC3tmp.dta", replace
+
 
 
 	

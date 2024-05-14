@@ -154,5 +154,10 @@
 		ta penta1 if UB2==1 [aw=weight] 
 		recode penta1 1=0 0=1, g(zdc)
 		ta zdc if UB2==1 [aw=weight] 
+		
+keep if UB2==1
+keep weight provcat penta3 covbase_comb opv3
+rename covbase_comb fullvax
+gen post=0
 
-save "$user/Data for analysis/DRC_2017_18_MICS.dta", replace
+save "/Users/catherine.arsenault/Dropbox/BMGF RISP Project/Quant analysis/Data for analysis/DRC2tmp.dta", replace
