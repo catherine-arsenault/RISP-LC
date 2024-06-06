@@ -36,11 +36,20 @@ u "$user/ECV/ECV_2021_Datasets/ECV_2021_Enfants.dta", clear
 	foreach v of global vaccines {
 		recode `v' 2=0
 	}
+	egen vpo3vpi=rowtotal(vpo3_merg vpi_merg)
+	recode vpo3vpi 1=0 2=1
 	
 	* Vaccination coverage (12-23 months)
 	tabstat $vaccines [aw=weight] if agecat==2 , by(provcat) stat (mean) 
-	
-	keep if agecat==2 
+preserve 
+	collapse (mean) vpo3_merg vpi_merg vpo3vpi (count) n_vpo3_merg=vpo3_merg n_vpi_merg=vpi_merg ///
+		n_vpo3vpi= vpo3vpi [aw=weight] if  (province==4 | province==14 | province==24) , by(province q103 q105) 
+	order province, before(q103)
+	export excel using "/Users/catherine.arsenault/Dropbox/BMGF RISP Project/Quant analysis/Results/DRC/polio_aire_Jun2024", sheet("ECV21", replace) firstrow(var) 
+restore 
+
+
+/* keep if agecat==2 
 	keep weight provcat penta3_merg covbase_comb vpo3_merg
 	gen post=1
 	rename penta3_merg penta3 
@@ -48,6 +57,7 @@ u "$user/ECV/ECV_2021_Datasets/ECV_2021_Enfants.dta", clear
 	rename vpo3_merg opv3
 
 	save "/Users/catherine.arsenault/Dropbox/BMGF RISP Project/Quant analysis/Data for analysis/DRC4tmp.dta", replace
+	*/
 
 *-------------------------------------------------------------------------------
 * ECV 2022		
@@ -80,21 +90,24 @@ u "$user/ECV/ECV_2022_VAC_Ménages_Mere_Enfants_VT_28052023", clear
 	* Vaccination coverage (12-23 months)
 	tabstat $vaccines [aw=weight] if agecat==2 , by(provcat) stat (mean) 
 	
-	keep if agecat==2 
-	keep weight provcat penta3_merg covbase_comb vpo3_merg
-	gen post=1
-	rename penta3_merg penta3 
-	rename covbase_comb fullvax
-	rename vpo3_merg opv3
-	save "/Users/catherine.arsenault/Dropbox/BMGF RISP Project/Quant analysis/Data for analysis/DRC5tmp.dta", replace
-
-	/* Polio vaccination by aire de santé
+	* Polio vaccination by aire de santé
 preserve 
 	collapse (mean) vpo3_merg vpi_merg vpo3vpi (count) n_vpo3_merg=vpo3_merg n_vpi_merg=vpi_merg ///
 		n_vpo3vpi= vpo3vpi [aw=weight] if  (province==4 | province==14 | province==24) , by(province q103 q105) 
 	order province, before(q103)
-	export excel using "/Users/catherine.arsenault/Dropbox/BMGF RISP Project/Quant analysis/Results/DRC/polio_aire", firstrow(var) replace
-restore */
+	export excel using "/Users/catherine.arsenault/Dropbox/BMGF RISP Project/Quant analysis/Results/DRC/polio_aire_Jun2024", sheet("ECV22")firstrow(var) modify
+restore 
+
+/* keep if agecat==2 
+	keep weight provcat penta3_merg covbase_comb vpo3_merg provi
+	gen post=1
+	rename penta3_merg penta3 
+	rename covbase_comb fullvax
+	rename vpo3_merg opv3
+	save "/Users/catherine.arsenault/Dropbox/BMGF RISP Project/Quant analysis/Data for analysis/DRC5tmp.dta", replace 
+	*/
+
+
 *-------------------------------------------------------------------------------
 * ECV 2020	
 u "$user/ECV/Base ECV 2020 Finale.dta", clear
@@ -115,8 +128,17 @@ u "$user/ECV/Base ECV 2020 Finale.dta", clear
 			
 	* Vaccination coverage (12-23 months)
 	tabstat $vaccines [aw=weight] if agecat==2 , by(provcat) stat (mean) 
+	egen vpo3vpi=rowtotal(polyo3combinew VPIcombinew)
+	recode vpo3vpi 1=0 2=1
 	
-	keep if agecat==2 
+preserve 
+	collapse (mean) polyo3combinew  VPIcombinew vpo3vpi (count) n_vpo3_merg=polyo3combinew n_vpi_merg=VPIcombinew ///
+		n_vpo3vpi= vpo3vpi [aw=weight] if  (prov==2 | prov==16) , by(prov zs as) 
+	order prov, before(zs)
+	export excel using "/Users/catherine.arsenault/Dropbox/BMGF RISP Project/Quant analysis/Results/DRC/polio_aire_Jun2024", sheet("ECV20", replace) firstrow(var) 
+restore 
+
+/*	keep if agecat==2 
 	keep weight provcat penta3combinew couvebasecomb  polyo3combinew 
 	gen post=1
 	rename penta3combine penta3
@@ -124,6 +146,7 @@ u "$user/ECV/Base ECV 2020 Finale.dta", clear
 	rename polyo3combinew opv3
 
 save "/Users/catherine.arsenault/Dropbox/BMGF RISP Project/Quant analysis/Data for analysis/DRC3tmp.dta", replace
+*/
 
 
 
