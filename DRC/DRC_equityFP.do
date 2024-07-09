@@ -1,7 +1,7 @@
 
 * Forest plots
 
-global user "/Users/catherine.arsenault/Dropbox/BMGF RISP Project/Quant analysis"
+global user "/Users/catherine.arsenault/Dropbox/9 PAPERS & PROJECTS/RISP folder/Quant analysis"
 	
 
 *-------------------------------------------------------------------------------
@@ -9,7 +9,12 @@ global user "/Users/catherine.arsenault/Dropbox/BMGF RISP Project/Quant analysis
 import delimited using "$user/Equity/wealth.csv",  clear
 drop if mashako=="Other"
 drop if year ==2013
-drop if vax=="bcgcombinew"
+drop if vax=="bcgcombinew" | vax=="OPV3"
+drop if mashako=="National"
+encode mashako, g(provgr)
+recode prov 5=2 2=5
+lab def prov 1"Haut Lomami" 2"Tanganyika" 3"Lualaba" 4 "Other initial Mashako Provinces" 5"Kinshasa"
+lab val prov prov
 sort mashako 
 
 replace vax ="Fully vaccinated" if vax=="couvebasecomb"
@@ -17,6 +22,46 @@ replace vax ="Penta3" if vax=="penta3combinew"
 replace vax ="MCV" if vax=="varcombinew"
 replace vax ="OPV3" if vax=="polyo3combinew"
 replace vax="ZDC" if vax=="dose0penta"
+
+* Full vax by Province group
+metan sii s_lci s_uci if vax=="Fully vaccinated",  by(prov) nosubgroup nooverall nobox ///
+sortby(vax year) label(namevar=year) forestplot(graphregion(color(white)) ///
+xlabel(-1, -0.5, 0, 0.5, 1) xtick (-1, -0.5, 0, 0.5, 1) astext(30) title("Haut Lomami", size(small)) ) effect(SII)
+
+* Pooled average by subgroup for Relative measure
+metan lnB lnF lnG if A=="`v'" , by(inc_group) random ///
+				eform nograph  label(namevar=country) effect(RII)
+	
+* Pooled average by subgroup for absolute measure
+* estimates of inequality at the province level DRCs 
+metan SII sii_lcl sii_ucl  if vaccine=="penta3" , by(prov_group) random ///
+				 nograph label(namevar=province) 
+
+*-------------------------------------------------------------------------------
+* FOREST PLOTS SII EDUCATION
+import delimited using "$user/Equity/education.csv",  clear
+drop if mashako=="Other"
+drop if year ==2013
+drop if vax=="bcgcombinew" | vax=="OPV3"
+drop if mashako=="National"
+encode mashako, g(provgr)
+recode prov 5=2 2=5
+lab def prov 1"Haut Lomami" 2"Tanganyika" 3"Lualaba" 4 "Other initial Mashako Provinces" 5"Kinshasa"
+lab val prov prov
+sort mashako 
+
+replace vax ="Fully vaccinated" if vax=="couvebasecomb"
+replace vax ="Penta3" if vax=="penta3combinew"
+replace vax ="MCV" if vax=="varcombinew"
+replace vax ="OPV3" if vax=="polyo3combinew"
+replace vax="ZDC" if vax=="dose0penta"
+
+* Full vax by Province group
+metan sii s_lci s_uci if vax=="Fully vaccinated",  by(prov) nosubgroup nooverall nobox ///
+sortby(vax year) label(namevar=year) forestplot(graphregion(color(white)) ///
+xlabel(-1, -0.5, 0, 0.5, 1) xtick (-1, -0.5, 0, 0.5, 1) astext(30) title("Haut Lomami", size(small)) ) effect(SII)
+
+
 
 metan sii s_lci s_uci if mashako=="1. Haut Lomami",  by(vax) nosubgroup nooverall nobox ///
 sortby(vax year) label(namevar=year) forestplot(graphregion(color(white)) ///

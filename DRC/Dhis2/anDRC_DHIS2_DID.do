@@ -7,13 +7,26 @@
 		1. Time-varying intervention dummy (MOU had been implemented or not)
 			For the purpose of this analysis, we assign MOU in HL and TAN at Jan 2019 onward.
 			In Lualaba, Jan 2022 is the beginning of the MOU.
+			
 		2. Time variable = dummy for each month 1 to 72
-		3. Province dummy 
+		
+		3. Province dummy (initial Mashako Provinces + MOU provinces)
 		
 		The coefficient of interest (effect of the MOU program) is the intervention dummy. 
 		
 		4. We also control for the Covid period which had different effects in different provinces
 		e.g., strikes in Tanganyika. */
+		
+		* If using the facility-level data, add a random effect for facility.
+		* instead the volumes, use relative volume relative to baseline per baseline. 
+		* So the data is standardized across small and large facilities.
+		* Use the average the volume for Jan 2018 to Dec 2019.
+		* Roy recommends: including a year dummy. This is of interest to the MOH.
+		
+		* or OLS, but convert to RR.
+		
+		
+		* Set up time as relative to the introduction of the intervention?
 		
 *---------------------------------------------------------------------------
 	use "$user/RAW DATA/DRC/DHIS2/DHIS2_2018-2023_long.dta", clear

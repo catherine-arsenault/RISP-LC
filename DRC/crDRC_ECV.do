@@ -1,5 +1,5 @@
 	
-	global user "/Users/catherine.arsenault/Dropbox/BMGF RISP Project/Quant analysis/RAW DATA/DRC"
+	global user "/Users/catherine.arsenault/Dropbox/9 PAPERS & PROJECTS/RISP folder/Quant analysis/RAW DATA/DRC"
 *-------------------------------------------------------------------------------
 * ECV 2021
 
@@ -45,7 +45,7 @@ preserve
 	collapse (mean) vpo3_merg vpi_merg vpo3vpi (count) n_vpo3_merg=vpo3_merg n_vpi_merg=vpi_merg ///
 		n_vpo3vpi= vpo3vpi [aw=weight] if  (province==4 | province==14 | province==24) , by(province q103 q105) 
 	order province, before(q103)
-	export excel using "/Users/catherine.arsenault/Dropbox/BMGF RISP Project/Quant analysis/Results/DRC/polio_aire_Jun2024", sheet("ECV21", replace) firstrow(var) 
+	export excel using "/Users/catherine.arsenault/Dropbox/9 PAPERS & PROJECTS/RISP folder/Quant analysis/Results/DRC/polio_aire_Jun2024", sheet("ECV21", replace) firstrow(var) 
 restore 
 
 
@@ -95,7 +95,7 @@ preserve
 	collapse (mean) vpo3_merg vpi_merg vpo3vpi (count) n_vpo3_merg=vpo3_merg n_vpi_merg=vpi_merg ///
 		n_vpo3vpi= vpo3vpi [aw=weight] if  (province==4 | province==14 | province==24) , by(province q103 q105) 
 	order province, before(q103)
-	export excel using "/Users/catherine.arsenault/Dropbox/BMGF RISP Project/Quant analysis/Results/DRC/polio_aire_Jun2024", sheet("ECV22")firstrow(var) modify
+	export excel using "/Users/catherine.arsenault/Dropbox/9 PAPERS & PROJECTS/RISP folder/Quant analysis/Results/DRC/polio_aire_Jun2024", sheet("ECV22")firstrow(var) 
 restore 
 
 /* keep if agecat==2 
@@ -135,7 +135,7 @@ preserve
 	collapse (mean) polyo3combinew  VPIcombinew vpo3vpi (count) n_vpo3_merg=polyo3combinew n_vpi_merg=VPIcombinew ///
 		n_vpo3vpi= vpo3vpi [aw=weight] if  (prov==2 | prov==16) , by(prov zs as) 
 	order prov, before(zs)
-	export excel using "/Users/catherine.arsenault/Dropbox/BMGF RISP Project/Quant analysis/Results/DRC/polio_aire_Jun2024", sheet("ECV20", replace) firstrow(var) 
+	export excel using "/Users/catherine.arsenault/Dropbox/9 PAPERS & PROJECTS/RISP folder/Quant analysis/Results/DRC/polio_aire_Jun2024", sheet("ECV20", replace) firstrow(var) 
 restore 
 
 /*	keep if agecat==2 
